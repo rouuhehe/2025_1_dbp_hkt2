@@ -100,10 +100,10 @@ Authorization: Bearer JWT_TOKEN
 
 ## 💰 Gastos
 
-### 📊 Resumen mensual
+### 📊 Resumen
 
 ```http
-GET http://198.211.105.95:8080/expenses_summary?year=YYYY&month=MM
+GET http://198.211.105.95:8080/expenses_summary
 ```
 
 Devuelve el total de gastos por categoría del mes solicitado.  
