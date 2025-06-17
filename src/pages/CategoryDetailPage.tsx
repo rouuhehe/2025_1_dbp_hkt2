@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getExpensesByCategory } from "@/api/expenses";
+import { getExpensesByCategory } from "../api/expenses";
 import { useParams } from "react-router-dom";
 
 type Expense = {
