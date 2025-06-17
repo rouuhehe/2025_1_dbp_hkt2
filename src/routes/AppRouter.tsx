@@ -9,8 +9,8 @@ export default function AppRouter() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<DashboardPage />} />
-                <Route path="/login" element={<LoginPage />} /> 
-                <Route path="/register" element={<RegisterPage />} /> 
+                <Route path="authentication/login" element={<LoginPage />} /> 
+                <Route path="authentication/register" element={<RegisterPage />} /> 
                 <Route path="/detalle/:year/:month/:categoryId" element={<CategoryDetailPage />} /> 
                 
             </Routes>
