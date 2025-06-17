@@ -20,7 +20,7 @@ export default function RegisterForm() {
       await register(formData);
       setSuccess(true);
       setError("");
-      window.location.href = "/login";
+      window.location.href = "authentication/register";
     } catch (err: any) {
       setError(err.message);
       setSuccess(false);
