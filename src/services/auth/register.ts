@@ -5,7 +5,7 @@ export async function register(registerRequest: RegisterRequest) {
     try {
         const api = await Api.getInstance();
         await api.post<RegisterRequest, void>(
-            registerRequest, { url: "/auth/register" }
+            registerRequest, { url: "/authentication/register" }
         )
     } catch (error) {
         throw new Error("Registro fallido")

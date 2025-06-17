@@ -6,7 +6,7 @@ export async function login(loginRequest: LoginRequest) {
     try {
         const api = await Api.getInstance();
         const response = await api.post<LoginRequest, AuthResponse>(
-            loginRequest, { url: "/auth/login" }
+            loginRequest, { url: "/authentication/login" }
         )
         const authData = response.data
 
