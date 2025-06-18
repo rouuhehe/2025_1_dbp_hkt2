@@ -1,15 +1,17 @@
-import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
-import checker from "vite-plugin-checker";
-import tsconfigPaths from "vite-tsconfig-paths";
+// vite.config.ts
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-	plugins: [
-		react(),
-		tsconfigPaths(),
-		checker({
-			typescript: true,
-		}),
-	],
-});
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://198.211.105.95:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        secure: false
+      }
+    }
+  }
+})

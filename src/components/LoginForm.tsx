@@ -1,48 +1,70 @@
-import { useState } from "react";
-import { login } from "@services/auth/login";
 import { LoginRequest } from "../interface/auth/LoginRequest";
-import { AuthResponse } from "../interface/auth/AuthResponse";
+import { login } from "../services/auth/login";
+import { ChangeEvent, FormEvent, useState } from "react";
 
 export default function LoginForm() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+	const [formData, setFormData] = useState<LoginRequest>({
+		email: "",
+		passwd: "",
+	});
 
-    const handleLogin = async () => {
-        try {
-            const loginRequest: LoginRequest = {
-                email,
-                passwd: password,
-            };
+	const [error, setErrorMsg] = useState("");
+	const [successMessage, setSuccessMessage] = useState("");
 
-            const authResponse: AuthResponse = await login(loginRequest);
 
-            localStorage.setItem("token", authResponse.data.token);
-            localStorage.setItem("email", authResponse.data.email);
+	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+		const { name, value } = e.target;
+		setFormData({ ...formData, [name]: value });
+	}
 
-            window.location.href = "/dashboard";
-        } catch (error: any) {
-            setError(error.message);
-        }
-    };
+	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		try {
+			const res = await login(formData);
+			setSuccessMessage("¡Sesión iniciada correctamente!");
+			setErrorMsg("");
+			localStorage.setItem("token", res.data.token);
+		} catch (error) {
+			setErrorMsg("Correo o contraseña incorrectos.");
+			setSuccessMessage("");
+		}
+	}
 
-    return (
-        <div>
-            <h1>Login Form</h1>
-            <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button onClick={handleLogin}>Login</button>
-            {error && <p>{error}</p>}
-        </div>
-    );    
+	return (
+		<section className="">
+			<form onSubmit={handleSubmit} className="flex flex-col gap-7">
+				<div className="mt-7 flex flex-col">
+					<label htmlFor="email"
+					className="text-sm font-regular  ml-3 text-neutral-600"
+					>Email</label>
+					<input 
+					type="email" 
+					name="email" 
+					id="email" 
+					className="border border-neutral-500 mt-0.5 rounded-sm p-2 bg-zinc-200 "
+					value={formData.email} 
+					onChange={handleChange} 
+					/>
+				</div>
+				<div className="flex flex-col">
+					<label htmlFor="password"
+					className="text-sm ml-3 text-neutral-600"
+					>Contraseña</label>
+					<input
+						type="password"
+						name="passwd"
+						id="password"
+						className="border mt-0.5  border-neutral-500  rounded-sm p-2 bg-zinc-200"
+						value={formData.passwd}
+						onChange={handleChange}
+					/>
+				</div>
+				<button id="loginSubmit" className="bg-primary font-bold text-sm  text-white p-2 rounded-full" type="submit">
+					Iniciar Sesión
+				</button>
+			</form>
+			{error && <div style={{ color: "red" }}>{error}</div>}
+			{successMessage && <div style={{ color: "blue" }}>{successMessage}</div>}
+		</section>
+	);
 }

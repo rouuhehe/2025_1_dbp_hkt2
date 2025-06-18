@@ -1,7 +1,7 @@
-import DashboardPage from "@pages/DashboardPage";
+import DashboardPage from "../pages/DashboardPage";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
-import CategoryDetailPage from "@pages/CategoryDetailPage";
+import CategoryDetailPage from "../pages/CategoryDetailPage";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 export default function AppRouter() {

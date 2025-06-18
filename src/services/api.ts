@@ -8,7 +8,6 @@ export default class Api {
     private static _instance: Api | null = null;
 
     private _basePath: string;
-
     private _authorization: string | null;
 
     public set authorization(value: string) {
@@ -22,8 +21,10 @@ export default class Api {
 
     public static async getInstance() {
         if (!this._instance) {
-            const basePath = `http://198.211.105.95:8080`;
-            this._instance = new Api(basePath, null);
+            const basePath = import.meta.env.MODE === 'development' 
+        ? '/api' 
+        : 'http://198.211.105.95:8080'; 
+    this._instance = new Api(basePath, null);
         }
 
         return this._instance;
@@ -55,18 +56,23 @@ export default class Api {
         return this.request<RequestType, ResponseType>(configOptions);
     }
 
-    public post<RequestBodyType, ResponseBodyType>(
-        data: RequestBodyType,
-        options: AxiosRequestConfig,
-    ) {
-        const configOptions: AxiosRequestConfig = {
-            ...options,
-            method: "POST",
-            data,
-        };
 
-        return this.request<RequestBodyType, ResponseBodyType>(configOptions);
-    }
+    public async post<RequestBodyType, ResponseBodyType>(
+    config: AxiosRequestConfig
+): Promise<AxiosResponse<ResponseBodyType>> {
+    const requestConfig: AxiosRequestConfig = {
+        ...config,
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...(this._authorization && { 
+                Authorization: `Bearer ${this._authorization}` 
+            }),
+            ...config.headers
+        }
+    };
+    return this.request<ResponseBodyType>(requestConfig);
+}
 
     public delete(options: AxiosRequestConfig) {
         const configOptions: AxiosRequestConfig = {

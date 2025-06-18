@@ -1,19 +1,23 @@
-import Api from "@services/api";
 import { AuthResponse } from "src/interface/auth/AuthResponse";
+import Api from "../../services/api";
 import { LoginRequest } from "src/interface/auth/LoginRequest";
 
-export async function login(loginRequest: LoginRequest) {
+export async function login(loginRequest: LoginRequest): Promise<AuthResponse> {
     try {
         const api = await Api.getInstance();
-        const response = await api.post<LoginRequest, AuthResponse>(
-            loginRequest, { url: "/authentication/login" }
-        )
-        const authData = response.data
+        
+        const response = await api.post<LoginRequest, AuthResponse>({
+            url: "/authentication/login",
+            data: loginRequest
+        });
 
-        localStorage.setItem("token", authData.data.token)
+        if (response.data?.token) {
+            api.authorization = response.data.token;
+        }
 
-        return authData
+        return response.data;
     } catch (error) {
-        throw new Error("Login fallido")
+        console.error("Error detallado:", error);
+        throw new Error("Login Fallido!");
     }
 }
