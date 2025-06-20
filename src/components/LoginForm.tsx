@@ -1,70 +1,98 @@
+import { ChangeEvent, FormEvent, useState, useContext } from "react";
+import { login as loginService } from "../services/auth/login";
 import { LoginRequest } from "../interface/auth/LoginRequest";
-import { login } from "../services/auth/login";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { AxiosError } from "axios";
+
 
 export default function LoginForm() {
 	const [formData, setFormData] = useState<LoginRequest>({
 		email: "",
-		passwd: "",
+		passwd: ""
 	});
 
-	const [error, setErrorMsg] = useState("");
-	const [successMessage, setSuccessMessage] = useState("");
+	const [error, setError] = useState("");
+	const [loading, setLoading] = useState(false);
 
+	const { login } = useContext(AuthContext); // login del context
+	const navigate = useNavigate();
 
-	function handleChange(e: ChangeEvent<HTMLInputElement>) {
+	const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
-		setFormData({ ...formData, [name]: value });
-	}
+		setFormData(prev => ({ ...prev, [name]: value }));
+		setError("");
+	};
 
-	async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+	const handleSubmit = async (e: FormEvent) => {
 		e.preventDefault();
+		setLoading(true);
+
 		try {
-			const res = await login(formData);
-			setSuccessMessage("¡Sesión iniciada correctamente!");
-			setErrorMsg("");
-			localStorage.setItem("token", res.data.token);
-		} catch (error) {
-			setErrorMsg("Correo o contraseña incorrectos.");
-			setSuccessMessage("");
+			const response = await loginService(formData);
+			login(response.token);
+			navigate("/expenses_summary");
+		} catch (err) {
+			if (err instanceof AxiosError) {
+				const msg = err.response?.data?.message || "Error en la petición";
+				setError(msg);
+			} else if (err instanceof Error) {
+				setError(err.message);
+			} else {
+				setError("Ocurrió un error inesperado");
+			}
 		}
-	}
+	};
 
 	return (
-		<section className="">
-			<form onSubmit={handleSubmit} className="flex flex-col gap-7">
-				<div className="mt-7 flex flex-col">
-					<label htmlFor="email"
-					className="text-sm font-regular  ml-3 text-neutral-600"
-					>Email</label>
-					<input 
-					type="email" 
-					name="email" 
-					id="email" 
-					className="border border-neutral-500 mt-0.5 rounded-sm p-2 bg-zinc-200 "
-					value={formData.email} 
-					onChange={handleChange} 
-					/>
+		<div className="max-w-md mx-auto p-6 bg-white rounded-lg">
+			<form onSubmit={handleSubmit} className="space-y-3">
+				<div>
+					<label htmlFor="email" className="block mb-1 font-medium">
+						Email
+						<input
+							type="email"
+							id="email"
+							name="email"
+							value={formData.email}
+							onChange={handleChange}
+							className="w-full p-2 border rounded mt-1"
+							required
+						/>
+					</label>
 				</div>
-				<div className="flex flex-col">
-					<label htmlFor="password"
-					className="text-sm ml-3 text-neutral-600"
-					>Contraseña</label>
-					<input
-						type="password"
-						name="passwd"
-						id="password"
-						className="border mt-0.5  border-neutral-500  rounded-sm p-2 bg-zinc-200"
-						value={formData.passwd}
-						onChange={handleChange}
-					/>
+
+				<div>
+					<label htmlFor="passwd" className="block mb-1 font-medium">
+						Contraseña
+						<input
+							type="password"
+							id="passwd"
+							name="passwd"
+							value={formData.passwd}
+							onChange={handleChange}
+							className="w-full p-2 border rounded mt-1"
+							required
+						/>
+					</label>
 				</div>
-				<button id="loginSubmit" className="bg-primary font-bold text-sm  text-white p-2 rounded-full" type="submit">
-					Iniciar Sesión
+
+				<button
+					type="submit"
+					disabled={loading}
+					className={`w-full py-2 px-4 rounded text-white ${
+						loading ? 'bg-gray-400' : 'bg-blue-600 hover:bg-blue-700'
+					}`}
+				>
+					{loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
 				</button>
 			</form>
-			{error && <div style={{ color: "red" }}>{error}</div>}
-			{successMessage && <div style={{ color: "blue" }}>{successMessage}</div>}
-		</section>
+
+			{error && (
+				<div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+					{error}
+				</div>
+			)}
+		</div>
 	);
 }

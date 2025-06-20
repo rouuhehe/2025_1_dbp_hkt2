@@ -2,17 +2,14 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { register } from "../services/auth/register";
 import { RegisterRequest } from "../interface/auth/RegisterRequest";
 
-export default function RegisterForm() {
-    const [formData, setFormData] = useState<RegisterRequest>({
-        email: "",
-        passwd: ""
-    });
+type RegisterFormProps = {
+  formData: RegisterRequest;
+  setFormData: React.Dispatch<React.SetStateAction<RegisterRequest>>;
+};
 
-    // mensajes de error y éxito
+export default function RegisterForm({ formData, setFormData }: RegisterFormProps) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
-
-    // loading para darle un efecto más chvr
     const [loading, setLoading] = useState(false);
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -24,27 +21,31 @@ export default function RegisterForm() {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        
+
         try {
-            // Validación 
             if (formData.passwd.length < 12) {
-                throw new Error("La contraseña debe tener al menos 12 caracteres");
+              setError("La contraseña debe tener al menos 12 caracteres");
+              setLoading(false);
+              return;
             }
 
             await register(formData);
             setSuccess(true);
             setError("");
-            
-            // Redirigir después de 2 segundos
+
             setTimeout(() => {
                 window.location.href = "/authentication/login";
             }, 2000);
-            
+
         } catch (err) {
+          console.error("Error en el registro:", err);
+
+          if (err instanceof Error) {
             setError(err.message);
-            setSuccess(false);
-        } finally {
-            setLoading(false);
+          } else {
+            setError("Ocurrió un error inesperado.");
+          }
+          setSuccess(false);
         }
     };
 
